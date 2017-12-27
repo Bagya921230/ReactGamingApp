@@ -13,14 +13,15 @@ import {
   Alert,
   Dimensions,
   FlatList,
-  ScrollView
+  ScrollView,
+  AsyncStorage
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import ProgressBar from 'react-native-progress/Bar';
 import { RecyclerListView, DataProvider, LayoutProvider } from "recyclerlistview";
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 
-
+// let avatar = this.state.avatar==null ? require('../img/diamond1.png') : {uri:this.state.avatar};
 const window = Dimensions.get('window');
 var imageURI = 'http://books.google.com/books/content?id=PCDengEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api'
 
@@ -34,18 +35,169 @@ export default class ProfileScreen extends Component {
         Actions.pop();
       }
 
+      componentDidMount() {
 
+        this._getToken();
+
+      }
+      constructor(props) {
+        super(props);
+        this.state = { avatar: null,userName: "",currentLevelPoints:1,currentLevelEarnedPoints:0,myWalletAccount:"",balance:""
+      ,userSubscriptions:""};
+
+       }
+
+      async _getToken(){
+              try {
+                const value = await AsyncStorage.getItem('@MySuperStore:token');
+                if (value !== null){
+                  // We have data!!
+                  console.log(value);
+
+
+                  this.setState({token: value}, () => {
+                     this._getUserDetails();
+                     this._getLevelPoints();
+                     this._getWalletBalance();
+                     this._getUserSubscriptions();
+                  });
+
+
+                }
+              } catch (error) {
+                // Error retrieving data
+              }
+        }
+
+      _getUserDetails() {
+
+          fetch('http://gaming.dialog.lk/api/v2/tokenValidation',{
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': `${this.state.token}`
+            }
+          })
+           .then((response) => response.json())
+           .then((responseJson) => {
+            if(responseJson.responseCode=="00"){
+
+             this.setState({
+               isLoading: false,
+               userName: responseJson.displayName,
+               avatar: responseJson.avatar,
+               myWalletAccount: responseJson.myWalletAccount,
+             }, function() {
+               // In this block you can do something with new state.
+             });
+            }
+           })
+           .catch((error) => {
+             console.error(error);
+           });
+
+       }
+
+       _getLevelPoints() {
+
+         fetch('http://gaming.dialog.lk/api/v2/getLevelPoints',{
+           method: 'GET',
+           headers: {
+             'Accept': 'application/json',
+             'Content-Type': 'application/json',
+             'Authorization': `${this.state.token}`
+           }
+         })
+          .then((response) => response.json())
+          .then((responseJson) => {
+           if(responseJson.responseCode=="00"){
+
+            this.setState({
+              isLoading: false,
+              currentLevel: responseJson.responseBody.currentLevel,
+              currentLevelPoints: responseJson.responseBody.currentLevelPoints,
+              currentLevelEarnedPoints:responseJson.responseBody.currentLevelEarnedPoints,
+              totalUserPoints:responseJson.responseBody.totalUserPoints,
+              lessPointsToNextLevel:responseJson.responseBody.lessPointsToNextLevel,
+            }, function() {
+              // In this block you can do something with new state.
+            });
+           }
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+
+      }
+
+      _getWalletBalance() {
+
+        fetch('http://gaming.dialog.lk/api/v2/getWalletBalance',{
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `${this.state.token}`
+          }
+        })
+         .then((response) => response.json())
+         .then((responseJson) => {
+          if(responseJson.responseCode=="00"){
+
+           this.setState({
+             isLoading: false,
+             balance: responseJson.responseBody.balance,
+             myWalletAccount: responseJson.responseBody.myWalletAccount,
+           }, function() {
+             // In this block you can do something with new state.
+           });
+          }
+         })
+         .catch((error) => {
+           console.error(error);
+         });
+
+      }
+
+      _getUserSubscriptions() {
+
+        fetch('http://gaming.dialog.lk/api/v2/getUserSubscriptions',{
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `${this.state.token}`
+          }
+        })
+         .then((response) => response.json())
+         .then((responseJson) => {
+          if(responseJson.responseCode=="00"){
+
+           this.setState({
+             isLoading: false,
+             userSubscriptions: responseJson.responseBody,
+           }, function() {
+             // In this block you can do something with new state.
+           });
+          }
+         })
+         .catch((error) => {
+           console.error(error);
+         });
+
+      }
 
     render() {
 
           return (
             <ScrollView>
               <View style={styles.container}>
-                
+
                 <Image
                     style={styles.fullWidthContainer}
                     source={require('../img/cover.png')}
-                  >   
+                  >
 
                   <View style={{
                     flexDirection: 'row',
@@ -61,7 +213,7 @@ export default class ProfileScreen extends Component {
                           source={require('../img/go-back-left-arrow.png')}
                         />
                     </TouchableOpacity>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                        onPress={() => Actions.actionEditProfile()}>
                       <Image
                           style={styles.image1}
@@ -70,16 +222,16 @@ export default class ProfileScreen extends Component {
                     </TouchableOpacity>
                   </View>
 
-                  
+
 
                   <View style={styles.buttonStyle}>
 
                     <Image style={styles.circleImage}
-                                    source={require('../img/avatar.png')}
+                                    source={this.state.avatar==null ? require('../img/avatar.png'):{uri:this.state.avatar}}
                                   />
 
-                    <Text style={styles.userNameText}>User Name</Text>
-                    <Text style={styles.levelText}>Level 06</Text>
+                    <Text style={styles.userNameText}>{this.state.userName}</Text>
+                    <Text style={styles.levelText}>{this.state.currentLevel}</Text>
 
                   </View>
 
@@ -91,12 +243,12 @@ export default class ProfileScreen extends Component {
                     alignItems: 'center',
                   }}>
                     <Text style={styles.pointLabelText}>Points    </Text>
-                    <Text style={styles.pointsText}>46</Text>
+                    <Text style={styles.pointsText}>{this.state.totalUserPoints}</Text>
                 </View>
 
 
                 <View style={styles.getStarted}>
-                  <ProgressBar borderWidth={0} borderColor={'#542831'} unfilledColor={'#542831'} progress={0.3} width={window.width-2} height={5} color={'#E87E04'} borderRadius={4} />
+                  <ProgressBar borderWidth={0} borderColor={'#542831'} unfilledColor={'#542831'} progress={this.state.currentLevelEarnedPoints/this.state.currentLevelPoints} width={window.width-2} height={5} color={'#E87E04'} borderRadius={4} />
                 </View>
 
                 <View style={{
@@ -106,8 +258,8 @@ export default class ProfileScreen extends Component {
                     marginLeft: 15,
                     marginRight: 15
                   }}>
-                    <Text style={styles.pointLabelText}>150 points more</Text>
-                    <Text style={styles.pointLabelText}>Level 07</Text>
+                    <Text style={styles.pointLabelText}>{this.state.lessPointsToNextLevel} points more</Text>
+                    <Text style={styles.pointLabelText}>Level {this.state.currentLevel+1}</Text>
                 </View>
 
                 <View style={{
@@ -115,7 +267,7 @@ export default class ProfileScreen extends Component {
                     marginLeft: 15,
                     marginTop: 10
                   }}>
-                    <Text style={styles.gameCountText}>3  </Text>
+                    <Text style={styles.gameCountText}>{this.state.userSubscriptions.length}  </Text>
                     <Text style={styles.gameLabelText}>Games</Text>
                 </View>
 
@@ -131,7 +283,7 @@ export default class ProfileScreen extends Component {
                       justifyContent: 'space-between',
                     }}>
                       <Text style={styles.walletLabelText}>MY WALLET</Text>
-                      <Text style={styles.walletBalanceText}>Rs. 0.00</Text>
+                      <Text style={styles.walletBalanceText}> {this.state.myWalletAccount==null ? "N/A":"Rs. "+this.state.balance}</Text>
                     </View>
                     <TouchableOpacity style = {{marginTop: 20}} onPress={() => Actions.actionTopUpWallet()}>
                         <View style = {{backgroundColor: '#E87E04', marginTop: 20,
@@ -154,25 +306,16 @@ export default class ProfileScreen extends Component {
                   }}>
                   <Text style={styles.purchasedLabelText}>PURCHASED GAMES</Text>
                   <Text style={styles.pointsText}>See More</Text>
-                    
+
                 </View>
-                
+
 
                 <FlatList
                   horizontal={true}
-                  data={[
-                    {key: 'Devin','imageUrl': 'http://books.google.com/books/content?id=PCDengEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api'},
-                    {key: 'Jackson','imageUrl': 'http://www.abc.net.au/reslib/201612/r1646745_25272999.jpg'},
-                    {key: 'James','imageUrl': 'https://i.ytimg.com/vi/wwCZF4bGQGI/maxresdefault.jpg'},
-                    {key: 'Joel','imageUrl': 'http://aarp-amsarkadium-a.akamaized.net/assets/global/game/pool/da603c72-8362-4817-8474-55675bf6805d/300x300.jpg'},
-                    {key: 'John','imageUrl': 'http://books.google.com/books/content?id=PCDengEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api'},
-                    {key: 'Jillian','imageUrl': 'http://books.google.com/books/content?id=PCDengEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api'},
-                    {key: 'Jimmy','imageUrl': 'http://books.google.com/books/content?id=PCDengEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api'},
-                    {key: 'Julie','imageUrl': 'http://books.google.com/books/content?id=PCDengEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api'},
-                  ]
+                  data={this.state.userSubscriptions
                 }
 
-                  renderItem={({item}) => 
+                  renderItem={({item}) =>
                   <View style={{
                             marginLeft: 15,
                             marginTop: 10,
@@ -180,13 +323,13 @@ export default class ProfileScreen extends Component {
                             width: 100,
                             backgroundColor: '#ffffff',
                             borderRadius: 3,
-                            
+
                           }}>
-                            
+
                             <Image
 
                                 style={styles.roundedSquare}
-                                source={{uri:item.imageUrl}}
+                                source={{uri:item.icon}}
                               >
                             </Image>
 
@@ -203,10 +346,10 @@ export default class ProfileScreen extends Component {
                     marginRight: 15,
                     marginTop: 10
                   }}>
-                  
+
                   <Text style={styles.accountLabelText}>CONNECT ACCOUNTS</Text>
                   <Text style={styles.pointsText}>Edit Accounts</Text>
-                    
+
                 </View>
 
                 <View style={styles.facebookAccountContainer}>
@@ -272,19 +415,23 @@ export default class ProfileScreen extends Component {
                 <TouchableOpacity>
                   <View style={styles.logOut}>
 
-                        <Text style={styles.getStartedFont} onPress={() => Actions.OnBoarding()}>LOG OUT</Text>
+                        <Text style={styles.getStartedFont} onPress={this.logout.bind(this)}>LOG OUT</Text>
                   </View>
                 </TouchableOpacity>
 
               </View>
-              
+
             </ScrollView>
 
 
-        
+
       );
     }
-  
+logout(){
+  //
+  AsyncStorage.removeItem('@MySuperStore:token');
+  Actions.OnBoarding();
+}
 }
 
 const styles = StyleSheet.create({
@@ -437,7 +584,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: window.width-30, 
+    width: window.width-30,
     backgroundColor: '#3b5998',
     borderRadius:4,
     marginBottom:10
@@ -450,7 +597,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: window.width-30, 
+    width: window.width-30,
     backgroundColor: '#dd4b39',
     borderRadius:4,
     marginBottom:10
@@ -463,13 +610,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: window.width-30, 
+    width: window.width-30,
     backgroundColor: '#bc274b',
     borderRadius:4,
     marginBottom:10
   },
   logOut: {
-    flex: 1, 
+    flex: 1,
     height: 70,
     backgroundColor: '#110440',
     justifyContent: 'center',

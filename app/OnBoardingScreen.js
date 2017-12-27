@@ -1,6 +1,6 @@
 // app/ScarletScreen.js
 
-import {StyleSheet, View, Text, Image, TouchableOpacity,BackHandler} from 'react-native';
+import {StyleSheet, View, Text, Image, TouchableOpacity,BackHandler,AsyncStorage} from 'react-native';
 import React, {Component} from 'react';
 import {PagerTabIndicator, IndicatorViewPager, PagerTitleIndicator, PagerDotIndicator} from 'rn-viewpager';
 import { Actions } from 'react-native-router-flux'; // New code
@@ -11,6 +11,15 @@ export default class OnBoardingScreen extends Component {
     Alert.alert('You tapped the button!')
   }
 
+  constructor(props) {
+    super(props);
+    // this._getToken();
+   }
+
+   componentDidMount() {
+
+
+   }
     render() {
         return (
             <View style={{flex:1}}>
@@ -28,7 +37,7 @@ export default class OnBoardingScreen extends Component {
                           <Text style={styles.welcome}>PLAY GAMES</Text>
                           <Text style={styles.subTitle} >Get access to a unique game library with all your favorite categories</Text>
                         </View>
-                       
+
                     </View>
 
                     <View style={styles.container}>
@@ -80,15 +89,15 @@ export default class OnBoardingScreen extends Component {
 
                       <Text style={styles.getStartedFont} onPress={() => Actions.actionAddNumber()}>GET STARTED</Text>
                   </View>
-          
 
-                
+
+
 
             </View>
         );
     }
 
-      
+
 
 
     _renderDotIndicator() {
@@ -132,7 +141,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   getStarted: {
-    flex: 1, 
+    flex: 1,
     backgroundColor: '#e87a04',
     justifyContent: 'center',
   },

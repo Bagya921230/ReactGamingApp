@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import {
   StyleSheet,
   Text,
-  View
+  View,
+  AsyncStorage
 } from 'react-native';
 import { Router, Scene } from 'react-native-router-flux';
 
@@ -21,23 +22,32 @@ import LeaderBoard from './app/LeaderBoard'
 import GameDetails from './app/GameDetails'
 import SearchScreen from './app/SearchScreen'
 import CategoryDetails from './app/CategoryDetails'
+import SplashScreen from './app/SplashScreen'
 //'./img/go-back-left-arrow.png'
 // static navigationOptions = { header: null }
 
 const App = () => {
+// this._getToken();
   return (
     <Router>
 
       <Scene key="actionRoot">
         <Scene key="OnBoarding"
           component={OnBoardingScreen}
-          hideNavBar = {true}  
+          hideNavBar = {true}
+          // initial={this.state.loggedIn}
+          // initial
+        />
+        <Scene key="Splash"
+          component={SplashScreen}
+          hideNavBar = {true}
+          // initial={this.state.loggedIn}
           initial
         />
-
         <Scene key="actionAddNumber"
           component={AddNumberScreen}
           hideNavBar = {true}
+
         />
 
         <Scene key="actionAddPin"
@@ -47,8 +57,8 @@ const App = () => {
 
         <Scene key="actionHomeScreen"
           component={HomeScreen}
-          hideNavBar = {true} 
-
+          hideNavBar = {true}
+          // initial={this.state.loggedOut}
         />
 
         <Scene key="actionProfileScreen"
@@ -109,14 +119,35 @@ const App = () => {
 
 
 
-        
+
 
       </Scene>
 
     </Router>
   );
 }
-
+// async _getToken(){
+//         try {
+//           const value = await AsyncStorage.getItem('@MySuperStore:token');
+//           if (value !== null){
+//             this.setState({
+//               loggedIn: true,
+//               loggedOut: false,
+//             }, function() {
+//               // In this block you can do something with new state.
+//             });
+//           }else{
+//             this.setState({
+//               loggedIn: false,
+//               loggedOut: true,
+//             }, function() {
+//               // In this block you can do something with new state.
+//             });
+//           }
+//         } catch (error) {
+//           // Error retrieving data
+//         }
+//   }
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -14,6 +14,7 @@ import {
   Dimensions
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
+import { renderIf } from 'render-if';
 
 
 const window = Dimensions.get('window');
@@ -25,49 +26,55 @@ export default class EditProfile extends Component {
         Actions.pop();
       }
 
+    constructor(props) {
+        super(props);
+        this.state = { status: false};
+    }
+
+    showBottomMenu(){
+      if (this.state.status==true) {
+        this.setState({status: false});
+      }else{
+        this.setState({status: true});
+      }
+
+    }
+
     render() {
-
-          return (
+      return (
         <View style={styles.container}>
-          
-          <Text style={styles.welcome}>Create your profile
-          </Text>
-                <View style={{
-                        width: window.width,
-                        height: 200,
-                        alignSelf: 'center',
-                        alignItems: 'center',
-                        marginLeft: 15,
-                        marginRight: 15
-                      }}>
-                      <Image style={styles.circleImage}
-                          source={require('../img/avatar.png')}
-                      />
-                      <Text style={styles.changeText}>Change Photo</Text>
-
-                </View>
-              
-          
-
+          <Text style={styles.welcome}>Create your profile</Text>
+          <View style={{flex: 1}}>
+          <View style={{
+              width: window.width,
+              height: 200,
+              alignSelf: 'center',
+              alignItems: 'center',
+              marginLeft: 15,
+              marginRight: 15}}>
+              <TouchableOpacity onPress={this.showBottomMenu.bind(this)}>
+                <Image style={styles.circleImage} source={require('../img/avatar.png')}  />
+                <Text style={styles.changeText} >Change Photo</Text>
+              </TouchableOpacity>
+          </View>
           <Text style={styles.hintText}>Gamer Name</Text>
-
-          <TextInput
-              underlineColorAndroid = 'transparent'
-              style={styles.textInputStyle}
-          />
-
+          <TextInput underlineColorAndroid = 'transparent'style={styles.textInputStyle}/>
           <View style={styles.buttonStyle}>
-
               <Text style={styles.buttonText}>FINISH</Text>
           </View>
-
-        
+          </View>
+          {(this.state.status==true)?
+          (
+            <View style={styles.openGalleryOrCamera}>
+            <Image style={styles.galleryImage} source={require('../img/gallery.png')}/>
+            <Image style={styles.cameraImage} source={require('../img/camera.png')}/>
+          </View>
+          ):(null)
+        }
         </View>
-
-        
       );
     }
-  
+
 }
 
 const styles = StyleSheet.create({
@@ -170,6 +177,26 @@ const styles = StyleSheet.create({
     width:120,
     height:120,
     borderRadius:120,
+  },
+  openGalleryOrCamera: {
+    backgroundColor: '#ffffff',
+    height:150,
+    justifyContent:'center',
+    flexDirection:'row',
+  },
+  galleryImage: {
+      alignItems:'center',
+      alignSelf:'center',
+      marginRight: 70,
+      width:50,
+      height:45,
+  },
+  cameraImage: {
+      alignItems:'center',
+      alignSelf:'center',
+      marginLeft: 70,
+      width:50,
+      height:42.5,
   },
 });
 

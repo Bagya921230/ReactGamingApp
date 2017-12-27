@@ -50,8 +50,8 @@ export default class HomeScreen extends Component {
                     };
 
      }
-      
-    //get Token from the storage  
+
+    //get Token from the storage
     async _getToken(){
             try {
               const value = await AsyncStorage.getItem('@MySuperStore:token');
@@ -60,7 +60,7 @@ export default class HomeScreen extends Component {
                 console.log(value);
 
 
-                this.setState({token: value}, () => { 
+                this.setState({token: value}, () => {
                    this._getUserDetails();
 
                 });
@@ -74,7 +74,7 @@ export default class HomeScreen extends Component {
 
     _getUserDetails() {
 
-        fetch('http://gaming.dialog.lk/api/v2/tokenValidation',{  
+        fetch('http://gaming.dialog.lk/api/v2/tokenValidation',{
           method: 'POST',
           headers: {
             'Accept': 'application/json',
@@ -104,7 +104,7 @@ export default class HomeScreen extends Component {
 
       _getLevelPoints() {
 
-        fetch('http://gaming.dialog.lk/api/v2/getLevelPoints',{  
+        fetch('http://gaming.dialog.lk/api/v2/getLevelPoints',{
           method: 'POST',
           headers: {
             'Accept': 'application/json',
@@ -228,10 +228,10 @@ export default class HomeScreen extends Component {
               </BottomNavigation>
             </View>
 
-        
+
       );
     }
-  
+
 }
 
 const styles = StyleSheet.create({
@@ -294,12 +294,12 @@ const styles = StyleSheet.create({
   },
   avatarIcon: {
     padding:10,
-    flex: 1, 
+    flex: 1,
     flexDirection: 'row'
   },
   editIcon: {
     padding:10,
-    width: 50, 
+    width: 50,
     height: 50,
     marginRight:10,
     marginBottom:10
